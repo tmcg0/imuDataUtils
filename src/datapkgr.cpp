@@ -3,14 +3,12 @@
 #include <vector>
 #include <hdf5_hl.h>
 #include "H5Cpp.h"
-#include "rotutils.h"
 // highfive includes
 #include "highfive/H5Attribute.hpp"
 #include "highfive/H5DataSet.hpp"
 #include "highfive/H5File.hpp"
 #include "highfive/H5DataSpace.hpp"
 #include "highfive/H5Group.hpp"
-#include <gtsam/geometry/Rot3.h>
 
 namespace h5=HighFive;
 //todo: migrate away from HighFive and use only the official HDF5 C++ API
@@ -59,8 +57,8 @@ namespace datapkgr
                 }// for loop to store data
                 // now also pull out quaternion from APDM
                 std::vector<std::vector<double>> qAPDM0=get_2d_data_from_dataset(processedGroup.getGroup(availSensorsStr[i]).getDataSet("Orientation"));
-                std::vector<Eigen::Vector4d> qAPDM=rotutils::VectorVectorDoubleToVectorEigenVector(qAPDM0);
-                std::vector<gtsam::Rot3> orientation_Rot3=rotutils::QuaternionVectorToRot3Vector(qAPDM); // q[NWU->L]
+                //std::vector<Eigen::Vector4d> qAPDM=rotutils::VectorVectorDoubleToVectorEigenVector(qAPDM0);
+                //std::vector<gtsam::Rot3> orientation_Rot3=rotutils::QuaternionVectorToRot3Vector(qAPDM); // q[NWU->L]
                 // remember: Eigen::Quaternion stores scalar component last
                 // now store data in an imudata struct
                 imudata dataout;
@@ -68,7 +66,7 @@ namespace datapkgr
                 dataout.gx=gx; dataout.gy=gy; dataout.gz=gz;
                 dataout.mx=mx; dataout.my=my; dataout.mz=mz;
                 dataout.measTime=t; dataout.unixTime=timeVec;
-                dataout.orientation=orientation_Rot3;
+                //dataout.orientation=orientation_Rot3;
                 dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
                 sensorFoundByLabel=true;
                 return dataout;
