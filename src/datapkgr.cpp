@@ -9,6 +9,7 @@
 #include "highfive/H5File.hpp"
 #include "highfive/H5DataSpace.hpp"
 #include "highfive/H5Group.hpp"
+#include <exception>
 
 namespace h5=HighFive;
 //todo: migrate away from HighFive and use only the official HDF5 C++ API
@@ -44,7 +45,7 @@ namespace datapkgr
                 std::vector<std::vector<double>> dataAccel=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Accelerometer"));
                 std::vector<std::vector<double>> dataGyro=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Gyroscope"));
                 std::vector<std::vector<double>> dataMag=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Magnetometer"));
-                std::vector<double> timeVec=get_1d_data_from_dataset(currentSensorGroup.getDataSet("Time"));
+                std::vector<double> unixTimeUtcMicroseconds=get_1d_data_from_dataset(currentSensorGroup.getDataSet("Time"));
                 // now loop through and set data
                 int vecLen=dataAccel.size();
                 std::vector<double> ax(vecLen), ay(vecLen), az(vecLen), gx(vecLen), gy(vecLen), gz(vecLen), mx(vecLen), my(vecLen), mz(vecLen);
@@ -53,7 +54,7 @@ namespace datapkgr
                     ax[j] = dataAccel[j][0]; ay[j] = dataAccel[j][1]; az[j] = dataAccel[j][2];
                     gx[j] = dataGyro[j][0]; gy[j] = dataGyro[j][1]; gz[j] = dataGyro[j][2];
                     mx[j] = dataMag[j][0]; my[j] = dataMag[j][1]; mz[j] = dataMag[j][2];
-                    t[j] = (timeVec[j] - timeVec[0]) / 1e6; // convert from unix time to relative time vector in seconds
+                    t[j] = (unixTimeUtcMicroseconds[j] - unixTimeUtcMicroseconds[0]) / 1e6; // convert from unix time to relative time vector in seconds
                 }// for loop to store data
                 // now also pull out quaternion from APDM
                 std::vector<std::vector<double>> qAPDM0=get_2d_data_from_dataset(processedGroup.getGroup(availSensorsStr[i]).getDataSet("Orientation"));
@@ -65,7 +66,7 @@ namespace datapkgr
                 dataout.ax=ax; dataout.ay=ay; dataout.az=az;
                 dataout.gx=gx; dataout.gy=gy; dataout.gz=gz;
                 dataout.mx=mx; dataout.my=my; dataout.mz=mz;
-                dataout.measTime=t; dataout.unixTime=timeVec;
+                dataout.relTimeSec=t; dataout.unixTimeUtcMicrosec=unixTimeUtcMicroseconds;
                 //dataout.orientation=orientation_Rot3;
                 dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
                 sensorFoundByLabel=true;
@@ -77,8 +78,30 @@ namespace datapkgr
         }
     } // end function
 
-    void writeImuToApdmOpalH5File(){
-        
+    void writeImuToApdmOpalH5File(const imu& imuToWrite, const std::string& h5Filename){
+        // write an imu to an APDM v5 .h5 file
+        // the parent directory of h5Filename must exist first. check for this.
+        // this code seems to work. next steps:
+        // constuct individual numbered groups under Processed/ and Sensors/, i.e., Sensors/234/ to hold the data.
+        // 2d orientation data goes under /Processed/###/ Dataset 'Orientation'
+        // 2d/1d sensor data goes under /Sensors/###/ Dataset Accelerometer,Barometer,Temperature,Time,Magnetometer,Gyroscope
+        try {
+            h5::File file(h5Filename, h5::File::ReadWrite | h5::File::Create | h5::File::Truncate); // we create a new hdf5 file
+            std::vector<size_t> TwoDdims(2); // set the sizes of the Nx3 2D datasets to write
+            TwoDdims[0] = 2;
+            TwoDdims[1] = 6;
+            h5::Group Processed=file.createGroup("Processed");
+            h5::Group Sensors=file.createGroup("Sensors");
+
+            h5::DataSet dataset = file.createDataSet<double>("Gyroscope", h5::DataSpace(TwoDdims));
+            double data[2][6] = {{1.1, 2.2, 3.3, 4.4, 5.5, 6.6},
+                                 {11.11, 12.12, 13.13, 14.14, 15.15, 16.16}};
+            dataset.write(data);
+
+        } catch (std::exception& err) {
+            // catch and print any HDF5 error
+            std::cerr << err.what() << std::endl;
+        }
     }
 
     std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr){
@@ -104,18 +127,23 @@ namespace datapkgr
         }
     }
 
-    std::vector<std::vector<double>> get_2d_data_from_dataset(h5::DataSet ds){
+    std::vector<std::vector<double>> get_2d_data_from_dataset(const h5::DataSet& ds){
         // simple function to return 2d dataset as vector of vector of doubles
         std::vector<std::vector<double>> datavec2;
         ds.read(datavec2);
         return datavec2;
     }
 
-    std::vector<double> get_1d_data_from_dataset(h5::DataSet ds){
+    std::vector<double> get_1d_data_from_dataset(const h5::DataSet& ds){
         // simple function to return 1d dataset as vector of doubles
         std::vector<double> datavec1;
         ds.read(datavec1);
         return datavec1;
+    }
+
+    int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>){
+
+        return 0;
     }
 
     bool is_apdm_h5_version5(std::string filestr){

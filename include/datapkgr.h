@@ -13,8 +13,10 @@ namespace datapkgr
 {
     imudata readSingleImuDataFromApdmOpalH5FileByLabel(std::string filestr, std::string label);
     std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr);
-    void writeImuToApdmOpalH5File();
+    int apdmh5v5ToCsv(const std::string& apdmH5File, const std::string& csvFileToWrite);
+    void writeImuToApdmOpalH5File(const imu& imuToWrite, const std::string& h5Filename);
     bool is_apdm_h5_version5(std::string filestr);
-    std::vector<std::vector<double>> get_2d_data_from_dataset(h5::DataSet ds);
-    std::vector<double> get_1d_data_from_dataset(h5::DataSet ds);
+    std::vector<std::vector<double>> get_2d_data_from_dataset(const h5::DataSet& ds);
+    std::vector<double> get_1d_data_from_dataset(const h5::DataSet& ds);
+    int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>);
 }

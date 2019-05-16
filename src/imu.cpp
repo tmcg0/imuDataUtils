@@ -12,13 +12,12 @@ imu::imu(std::string filePath, std::string labelName){
     this->ax=id.ax; this->ay=id.ay; this->az=id.az;
     this->gx=id.gx; this->gy=id.gy; this->gz=id.gz;
     this->mx=id.mx; this->my=id.my; this->mz=id.mz;
-    this->measTime=id.measTime;
+    this->relTimeSec=id.relTimeSec;
     this->label=id.label;
-    if(id.orientation.size()>0){ // if orientation exists
-        this->orientation=id.orientation;
+    if(id.qx.size()>0){ // if orientation exists
     }
-    this->m_deltaT=id.measTime[1]-id.measTime[0];
 } // end constructor
+
 
 void imu::print_sensor_maxmin(){
 // simple print the max and min for each sensor
@@ -38,9 +37,22 @@ unsigned long imu::length() const {
     return this->ax.size();
 }
 
-imu cutImuByIdx(int startIdx, int stopIdx){
+imu imu::cutImuByIdx(const int& startIdx, const int& stopIdx){
     // cut imu data down and return the chopped imu--note that this copies the imu so the original input imu is not affected
-
+    imu newImu=*this; // copy
+    // now go through the imu data fields and chop down by indexes in the new imu
+    if(newImu.gx.size()>stopIdx){newImu.gx=slice(newImu.gx,startIdx,stopIdx);}
+    if(newImu.gy.size()>stopIdx){newImu.gy=slice(newImu.gy,startIdx,stopIdx);}
+    if(newImu.gz.size()>stopIdx){newImu.gz=slice(newImu.gz,startIdx,stopIdx);}
+    if(newImu.ax.size()>stopIdx){newImu.ax=slice(newImu.ax,startIdx,stopIdx);}
+    if(newImu.ay.size()>stopIdx){newImu.ay=slice(newImu.ay,startIdx,stopIdx);}
+    if(newImu.az.size()>stopIdx){newImu.az=slice(newImu.az,startIdx,stopIdx);}
+    if(newImu.mx.size()>stopIdx){newImu.mx=slice(newImu.mx,startIdx,stopIdx);}
+    if(newImu.my.size()>stopIdx){newImu.my=slice(newImu.my,startIdx,stopIdx);}
+    if(newImu.mz.size()>stopIdx){newImu.mz=slice(newImu.mz,startIdx,stopIdx);}
+    if(newImu.unixTimeUtc.size()>stopIdx){newImu.unixTimeUtc=slice(newImu.unixTimeUtc,startIdx,stopIdx);}
+    if(newImu.relTimeSec.size()>stopIdx){newImu.relTimeSec=slice(newImu.relTimeSec,startIdx,stopIdx);}
+    return newImu;
 }
 
 std::map<std::string,imu> imu::getImuMapFromDataFile(std::string filestr){
@@ -60,4 +72,20 @@ void imu::printLabelsInFile(std::string datafilestr){
     for(int i=0;i<allLabels.size();i++){ // now create map
         std::cout<<"imu label "<<i<<": "<<allLabels[i]<<std::endl;
     }
+}
+
+bool isUnixTimeSec(unsigned long time){
+    // standard unix time is number of seconds since 12:00 am UTC on January 1, 1970.
+    // 2536323034 is timestamp of May 19, 2050. note: code will error out after this date.
+    unsigned long timeLimitSec=2536323034;
+    if(time>0 && time<timeLimitSec){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+int getNearestIdxFromUnixTimeUtc(int unixTimeUtc){
+    //
+
 }

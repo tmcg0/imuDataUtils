@@ -38,3 +38,7 @@ cmake-build-release/
 
 # CMake
 CMakeFiles/
+
+# other
+build/
+test/output/
