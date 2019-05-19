@@ -16,19 +16,19 @@ namespace testutils
 
     std::string getProjectRootDir(){
         // iterates down to current path until it finds directory named 'bioslam'
-        boost::filesystem::path bioslamroot;
-        bool foundBioslamRoot=false;
+        boost::filesystem::path projectroot;
+        bool foundRoot=false;
         for(auto& part : boost::filesystem::current_path()) {
-            bioslamroot /= part.c_str();
-            if(std::strcmp(part.c_str(),"imuUtils")==0){ // you found it. exit.
-                foundBioslamRoot=true;
+            projectroot /= part.c_str();
+            if(std::strcmp(part.c_str(),"imuDataUtils")==0){ // you found it. exit.
+                foundRoot=true;
                 break;
             }
         }
-        if(!foundBioslamRoot){
-            std::cout<<"EXCEPTION: could not bioslam root directory! (searched for directory in tree named 'bioslam')"<<std::endl;
+        if(!foundRoot){
+            std::cout<<"EXCEPTION: could not find root directory! (searched for directory in tree named 'imuDataUtils')"<<std::endl;
         }
-        return bioslamroot.string();
+        return projectroot.string();
     }
 
     std::string getTestDataFile(std::string filename){

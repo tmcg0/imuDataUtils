@@ -3,6 +3,8 @@
 #include <vector>
 #include <hdf5_hl.h>
 #include "H5Cpp.h"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 // highfive includes
 #include "highfive/H5Attribute.hpp"
 #include "highfive/H5DataSet.hpp"
@@ -20,6 +22,7 @@ std::vector<std::string> listDatasetNames(h5::Group groupName);
 void print_group_children(h5::Group groupName);
 bool is_group_a_dataset(std::string childGroupToTest);
 std::string get_sensor_label_from_apdm_v5_by_sensor_number(std::string filename, std::string sensorNumber);
+void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite);
 
 namespace datapkgr
 {
@@ -50,14 +53,18 @@ namespace datapkgr
                 int vecLen=dataAccel.size();
                 std::vector<double> ax(vecLen), ay(vecLen), az(vecLen), gx(vecLen), gy(vecLen), gz(vecLen), mx(vecLen), my(vecLen), mz(vecLen);
                 std::vector<double> t(vecLen);
+                // todo: pull out quat into 2d data and set it to vectors for qs, qx, qy, qz
                 for (int j=0;j<vecLen;j++) {
                     ax[j] = dataAccel[j][0]; ay[j] = dataAccel[j][1]; az[j] = dataAccel[j][2];
                     gx[j] = dataGyro[j][0]; gy[j] = dataGyro[j][1]; gz[j] = dataGyro[j][2];
                     mx[j] = dataMag[j][0]; my[j] = dataMag[j][1]; mz[j] = dataMag[j][2];
                     t[j] = (unixTimeUtcMicroseconds[j] - unixTimeUtcMicroseconds[0]) / 1e6; // convert from unix time to relative time vector in seconds
                 }// for loop to store data
-                // now also pull out quaternion from APDM
-                std::vector<std::vector<double>> qAPDM0=get_2d_data_from_dataset(processedGroup.getGroup(availSensorsStr[i]).getDataSet("Orientation"));
+                // now also pull out quaternion, if exists
+                std::vector<std::vector<double>> q;
+                if(processedGroup.getGroup(availSensorsStr[i]).exist("Orientation")){
+                    q=get_2d_data_from_dataset(processedGroup.getGroup(availSensorsStr[i]).getDataSet("Orientation"));
+                }
                 //std::vector<Eigen::Vector4d> qAPDM=rotutils::VectorVectorDoubleToVectorEigenVector(qAPDM0);
                 //std::vector<gtsam::Rot3> orientation_Rot3=rotutils::QuaternionVectorToRot3Vector(qAPDM); // q[NWU->L]
                 // remember: Eigen::Quaternion stores scalar component last
@@ -69,6 +76,7 @@ namespace datapkgr
                 dataout.relTimeSec=t; dataout.unixTimeUtcMicrosec=unixTimeUtcMicroseconds;
                 //dataout.orientation=orientation_Rot3;
                 dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
+                dataout.id=std::stoi(availSensorsStr[i]);
                 sensorFoundByLabel=true;
                 return dataout;
             } // if is the right label
@@ -85,23 +93,56 @@ namespace datapkgr
         // constuct individual numbered groups under Processed/ and Sensors/, i.e., Sensors/234/ to hold the data.
         // 2d orientation data goes under /Processed/###/ Dataset 'Orientation'
         // 2d/1d sensor data goes under /Sensors/###/ Dataset Accelerometer,Barometer,Temperature,Time,Magnetometer,Gyroscope
+        boost::filesystem::path h5file(h5Filename);
+        boost::filesystem::create_directory(h5file.parent_path());
         try {
+            std::cout<<"writing imu to "<<h5Filename<<std::endl;
             h5::File file(h5Filename, h5::File::ReadWrite | h5::File::Create | h5::File::Truncate); // we create a new hdf5 file
-            std::vector<size_t> TwoDdims(2); // set the sizes of the Nx3 2D datasets to write
-            TwoDdims[0] = 2;
-            TwoDdims[1] = 6;
-            h5::Group Processed=file.createGroup("Processed");
-            h5::Group Sensors=file.createGroup("Sensors");
-
-            h5::DataSet dataset = file.createDataSet<double>("Gyroscope", h5::DataSpace(TwoDdims));
-            double data[2][6] = {{1.1, 2.2, 3.3, 4.4, 5.5, 6.6},
-                                 {11.11, 12.12, 13.13, 14.14, 15.15, 16.16}};
-            dataset.write(data);
-
+            apdmH5FileFormatAddImuToFile(file,imuToWrite);
         } catch (std::exception& err) {
             // catch and print any HDF5 error
+            std::cout<<"error writing h5 file!"<<std::endl;
             std::cerr << err.what() << std::endl;
         }
+    }
+
+    void writeImuToApdmOpalH5File(const std::map<std::string,imu>& imuMapToWrite, const std::string& h5Filename){
+        // write an imu to an APDM v5 .h5 file
+        // the parent directory of h5Filename must exist first. check for this.
+        // this code seems to work. next steps:
+        // constuct individual numbered groups under Processed/ and Sensors/, i.e., Sensors/234/ to hold the data.
+        // 2d orientation data goes under /Processed/###/ Dataset 'Orientation'
+        // 2d/1d sensor data goes under /Sensors/###/ Dataset Accelerometer,Barometer,Temperature,Time,Magnetometer,Gyroscope
+        boost::filesystem::path h5file(h5Filename);
+        boost::filesystem::create_directory(h5file.parent_path());
+        try {
+            std::cout<<"writing imu map to "<<h5Filename<<std::endl;
+            h5::File file(h5Filename, h5::File::ReadWrite | h5::File::Create | h5::File::Truncate); // we create a new hdf5 file
+            for (auto const& x : imuMapToWrite){
+                apdmH5FileFormatAddImuToFile(file,x.second);
+            }
+        } catch (std::exception& err) {
+            // catch and print any HDF5 error
+            std::cout<<"error writing h5 file!"<<std::endl;
+            std::cerr << err.what() << std::endl;
+        }
+    }
+
+    std::vector<std::vector<double>> makeNestedVector(const std::vector<double>& data1, const std::vector<double>& data2, const std::vector<double>& data3){
+        assert(data1.size()==data2.size() && data1.size()==data3.size());
+        std::vector<std::vector<double>> returnVector(data1.size());
+        for(int i=0; i<data1.size(); i++){
+            std::vector<double> rowVec={data1[i],data2[i],data3[i]};
+            returnVector[i]=rowVec;
+        }
+        return returnVector;
+    }
+
+    int apdmCaseIdStringToInt(const std::string &caseId){
+        // iter
+        std::cout<<"case id: "<<caseId<<std::endl;
+        int asdf=234;
+        return 0;
     }
 
     std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr){
@@ -170,6 +211,52 @@ H5F_ACC_RDWR: Existing file is opened with read-write access. If file does not e
  */
 
 // -------------- helper functions ---------------
+void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite){
+    std::vector<size_t> TwoDdims={imuToWrite.length(),3}; // set the sizes of the Nx3 2D datasets to write
+    std::vector<size_t> OneDdims={imuToWrite.length()}; // set the sizes of the N 1D datasets to write
+    std::string idStr=std::to_string(imuToWrite.id);
+
+    bool fileFormatVerAttrExists = H5Aexists(file.getId(),"FileFormatVersion");
+    if(!fileFormatVerAttrExists) {
+        h5::Attribute fileFormatVerAttr = file.createAttribute<int>("FileFormatVersion", h5::DataSpace::From(5));
+        fileFormatVerAttr.write(5);
+    }
+    h5::Group Processed;
+    if(file.exist("Processed")){
+        Processed=file.getGroup("Processed");
+    }else{
+        Processed=file.createGroup("Processed");
+    }
+    h5::Group thisProcessed=Processed.createGroup(idStr);
+    // todo: add processed quaternion data
+    h5::Group Sensors;
+    if(file.exist("Sensors")){
+        Sensors=file.getGroup("Sensors");
+    }else{
+        Sensors=file.createGroup("Sensors");
+    }
+    h5::Group thisSensor=Sensors.createGroup(idStr);
+    // gyroscope
+    h5::DataSet gyroDataset = thisSensor.createDataSet<double>("Gyroscope", h5::DataSpace(TwoDdims));
+    std::vector<std::vector<double>> gyrovec=datapkgr::makeNestedVector(imuToWrite.gx,imuToWrite.gy,imuToWrite.gz);
+    gyroDataset.write(gyrovec);
+    // accelerometer
+    h5::DataSet accelDataset = thisSensor.createDataSet<double>("Accelerometer", h5::DataSpace(TwoDdims));
+    std::vector<std::vector<double>> accelvec=datapkgr::makeNestedVector(imuToWrite.ax,imuToWrite.ay,imuToWrite.az);
+    accelDataset.write(accelvec);
+    // magnetometer
+    h5::DataSet magDataset = thisSensor.createDataSet<double>("Magnetometer", h5::DataSpace(TwoDdims));
+    std::vector<std::vector<double>> magvec=datapkgr::makeNestedVector(imuToWrite.mx,imuToWrite.my,imuToWrite.mz);
+    magDataset.write(magvec);
+    // time
+    h5::DataSet timeDataset = thisSensor.createDataSet<double>("Time", h5::DataSpace(OneDdims));
+    timeDataset.write(imuToWrite.relTimeSec);
+    // make configuration group
+    h5::Group configGroup=thisSensor.createGroup("Configuration");
+    h5::Attribute labelAttr=configGroup.createAttribute<std::string>("Label 0",h5::DataSpace::From(imuToWrite.label));
+    labelAttr.write(imuToWrite.label);
+}
+
 
 std::vector<std::string> listPureGroupNames(h5::Group groupName){
         // will return valid groups (not datasets!)

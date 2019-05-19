@@ -13,6 +13,7 @@ public:
     std::vector<double> gx, gy, gz, ax, ay, az, mx, my, mz, qs, qx, qy, qz; // IMU sensor data arrays
     std::vector<double> relTimeSec; // time of measurements, relative to zero in seconds
     std::vector<double> unixTimeUtc; // unix time stamp in seconds, utc
+    int id; // unique id integer. in apdm sensors that looks like XI-000###
     std::vector<std::vector<double>> quaternion(); // turn quaternion into vector<vector<double>>
     std::string label; // a label to uniquely id an imu in a set
     void print_sensor_maxmin();
@@ -46,4 +47,5 @@ struct imudata{
     std::vector<double> ax, ay, az, gx, gy, gz, mx, my, mz, relTimeSec, pressure, temperature;
     std::vector<double> unixTimeUtcMicrosec, qs, qx, qy, qz;
     std::string label;
+    int id;
 };

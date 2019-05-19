@@ -8,13 +8,14 @@ imu::imu(std::string filePath, int readIdx){
 }
 
 imu::imu(std::string filePath, std::string labelName){
-    imudata id=datapkgr::readSingleImuDataFromApdmOpalH5FileByLabel(filePath, labelName);
-    this->ax=id.ax; this->ay=id.ay; this->az=id.az;
-    this->gx=id.gx; this->gy=id.gy; this->gz=id.gz;
-    this->mx=id.mx; this->my=id.my; this->mz=id.mz;
-    this->relTimeSec=id.relTimeSec;
-    this->label=id.label;
-    if(id.qx.size()>0){ // if orientation exists
+    imudata myImuData=datapkgr::readSingleImuDataFromApdmOpalH5FileByLabel(filePath, labelName);
+    this->ax=myImuData.ax; this->ay=myImuData.ay; this->az=myImuData.az;
+    this->gx=myImuData.gx; this->gy=myImuData.gy; this->gz=myImuData.gz;
+    this->mx=myImuData.mx; this->my=myImuData.my; this->mz=myImuData.mz;
+    this->relTimeSec=myImuData.relTimeSec;
+    this->label=myImuData.label;
+    this->id=myImuData.id;
+    if(myImuData.qx.size()>0){ // if orientation exists
     }
 } // end constructor
 
