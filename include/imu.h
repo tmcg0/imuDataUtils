@@ -27,7 +27,7 @@ public:
     // static member functions
     static std::map<std::string,imu> getImuMapFromDataFile(std::string filestr);
     static void printLabelsInFile(std::string datafilestr);
-    static int getNearestIdxFromUnixTimeUtc(int unixTimeUtc);
+
     static bool isUnixTimeSec(int time); // is this a valid unix time in seconds?
 
 }; // end classdef

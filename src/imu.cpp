@@ -13,6 +13,7 @@ imu::imu(std::string filePath, std::string labelName){
     this->gx=myImuData.gx; this->gy=myImuData.gy; this->gz=myImuData.gz;
     this->mx=myImuData.mx; this->my=myImuData.my; this->mz=myImuData.mz;
     this->relTimeSec=myImuData.relTimeSec;
+    this->unixTimeUtc=myImuData.unixTimeUtcMicrosec;
     this->label=myImuData.label;
     this->id=myImuData.id;
     if(myImuData.qx.size()>0){ // if orientation exists
