@@ -13,7 +13,9 @@ namespace datapkgr
 {
     imudata readSingleImuDataFromApdmOpalH5FileByLabel(std::string filestr, std::string label);
     std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr);
-    int apdmh5v5ToCsv(const std::string& apdmH5File, const std::string& csvFileToWrite);
+    int apdmh5ToCsv(const std::string& apdmH5File, const std::string& csvFileToWrite);
+    int writeImuMapToCsv(const std::map<std::string,imu>& imuMapToWrite, const std::string& csvFileToWrite);
+    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, const int& startIdx, const int& stopIdx);
     void writeImuToApdmOpalH5File(const imu& imuToWrite, const std::string& h5Filename);
     void writeImuToApdmOpalH5File(const std::map<std::string,imu>& imuMapToWrite, const std::string& h5Filename);
     bool is_apdm_h5_version5(std::string filestr);
@@ -22,4 +24,20 @@ namespace datapkgr
     int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>);
     std::vector<std::vector<double>> makeNestedVector(const std::vector<double>& data1, const std::vector<double>& data2, const std::vector<double>& data3);
     int apdmCaseIdStringToInt(const std::string &caseId);
+    template<typename T>
+    static int getNearestIdxFromVector(const std::vector<T>& myvec, const T& queryPt){
+        std::vector<T> newvec(myvec.size());
+        double minDiff=9e9;
+        int minIdx=0;
+        for(int i=0;i<myvec.size();i++){
+            newvec[i]=abs(myvec[i]-queryPt);
+            if(newvec[i]<minDiff){
+                minDiff=newvec[i];
+                minIdx=i;
+            }
+        }
+        return minIdx;
+    }
 }
+
+

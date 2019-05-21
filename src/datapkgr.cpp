@@ -5,6 +5,8 @@
 #include "H5Cpp.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <iostream>
+#include <fstream>
 // highfive includes
 #include "highfive/H5Attribute.hpp"
 #include "highfive/H5DataSet.hpp"
@@ -14,7 +16,6 @@
 #include <exception>
 
 namespace h5=HighFive;
-//todo: migrate away from HighFive and use only the official HDF5 C++ API
 
 // forward declare helper functions
 std::vector<std::string> listPureGroupNames(h5::Group groupName);
@@ -138,11 +139,89 @@ namespace datapkgr
         return returnVector;
     }
 
+    int apdmh5ToCsv(const std::string& apdmH5File, const std::string& csvFileToWrite){
+        // take in an APDM .h5 file, convert it to an imu map, write this imu map to a csv file.
+        std::map<std::string,imu> ImuMap=imu::getImuMapFromDataFile(apdmH5File);
+        writeImuMapToCsv(ImuMap,csvFileToWrite);
+        return 0;
+    }
+
+    int writeImuMapToCsv(const std::map<std::string,imu>& imuMapToWrite, const std::string& csvFileToWrite){
+        // write as a large .csv file where multiple IMUs are concatenated horizontally next to each other with column pattern:
+        // unixTimeAbs, reltimesec, gx, gy, gz, ax, ay, az, mx, my, mz
+        std::vector<std::string> colHeaders={"unix time (us)","time (sec)","gx (rad/s)","gy (rad/s)","gz (rad/s)","ax (m/s^2)","ay (m/s^2)","az (m/s^2)","mx (uT)","my (uT)","mz (uT)"};
+        int colsPerImu=11;
+        std::ofstream myfile;
+        myfile.open(csvFileToWrite);
+        myfile<<"Converted from APDM *.h5 file.\n";
+        // now loop through and set imu labels/id numbers with number of columns in between
+        auto it = imuMapToWrite.begin();
+        while(it!=imuMapToWrite.end()){
+            std::vector<std::string> row(colsPerImu);
+            row[0]=it->first; // make first entry the label
+            row[1]="hardwareIdHere";
+            for(int i=0;i<row.size();i++){
+                myfile<<row[i]; myfile<<",";
+            }
+            it++;
+        }
+        myfile<<"\n";
+        // now write data headers
+        auto it2 = imuMapToWrite.begin();
+        while(it2!=imuMapToWrite.end()){
+            for(int i=0;i<colHeaders.size();i++){
+                myfile<<colHeaders[i]; myfile<<",";
+            }
+            it2++;
+        }
+        myfile<<"\n";
+        // now write actual data, looping through imus
+        int nMeas=((imuMapToWrite.begin())->second).length();
+        std::map<std::string, imu>::const_iterator it3;
+        for(int measIdx=0;measIdx<nMeas;measIdx++){
+            for(it3 = imuMapToWrite.begin(); it3!=imuMapToWrite.end(); it3++){
+                if(it3->second.unixTimeUtc.size()==0){
+                    myfile<<"nan,";
+                }else{
+                    myfile<<std::to_string((unsigned long) it3->second.unixTimeUtc[measIdx]); myfile<<",";
+                }
+                myfile<<it3->second.relTimeSec[measIdx]; myfile<<",";
+                myfile<<it3->second.gx[measIdx]; myfile<<",";
+                myfile<<it3->second.gy[measIdx]; myfile<<",";
+                myfile<<it3->second.gz[measIdx]; myfile<<",";
+                myfile<<it3->second.ax[measIdx]; myfile<<",";
+                myfile<<it3->second.ay[measIdx]; myfile<<",";
+                myfile<<it3->second.az[measIdx]; myfile<<",";
+                myfile<<it3->second.mx[measIdx]; myfile<<",";
+                myfile<<it3->second.my[measIdx]; myfile<<",";
+                myfile<<it3->second.mz[measIdx]; myfile<<",";
+            } // loop over imus
+            myfile<<"\n";
+        } // loop over measurement rows
+        myfile.close();
+        return 0;
+    }
+
     int apdmCaseIdStringToInt(const std::string &caseId){
         // iter
         std::cout<<"case id: "<<caseId<<std::endl;
         int asdf=234;
         return 0;
+    }
+
+    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, const int& startIdx, const int& stopIdx){
+        std::map<std::string,imu> ImuMapCut;
+        auto it = ImuMap.begin();
+        while (it != ImuMap.end())
+        {
+            imu originalImu=(it->second);
+            imu cutImu=originalImu.cutImuByIdx(startIdx,stopIdx);
+            std::string word = it->first;
+            ImuMapCut.insert(std::pair<std::string,imu>(it->first,cutImu));
+            // Increment the Iterator to point to next entry
+            it++;
+        }
+        return ImuMapCut;
     }
 
     std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr){
