@@ -21,7 +21,7 @@ public:
     imu cutImuByIdx(const int& startIdx, const int& stopIdx);
     static imu cutImuByTime(double startTime, double stopTime);
     // --- public get methods --- //
-    double getDeltaT();
+    double getDeltaT() const;
     // --- public set methods --- //
 
     // static member functions

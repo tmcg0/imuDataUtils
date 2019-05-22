@@ -40,6 +40,17 @@ unsigned long imu::length() const {
     return this->ax.size();
 }
 
+double imu::getDeltaT() const {
+    // loop through and find average delta T (seconds)
+    std::vector<double> timeDiff(this->length()-1);
+    for(int i=0; i<timeDiff.size(); i++){
+        timeDiff[i]=this->relTimeSec[i+1]-this->relTimeSec[i];
+    }
+    double averageDeltaT = accumulate( timeDiff.begin(), timeDiff.end(), 0.0)/timeDiff.size();
+    std::cout<<"dt="<<averageDeltaT<<std::endl;
+    return averageDeltaT;
+}
+
 std::vector<std::vector<double>> imu::quaternion(){ // turn quaternion into vector<vector<double>>
     std::vector<std::vector<double>> q(this->length());
     for(int i=0; i<this->length();i++){
