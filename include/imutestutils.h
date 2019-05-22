@@ -4,7 +4,7 @@
 
 #include "imu.h"
 
-namespace testutils
+namespace imutestutils
 {
     std::string getTestDataDir();
     std::string getProjectRootDir();
