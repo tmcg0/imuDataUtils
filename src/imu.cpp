@@ -47,7 +47,6 @@ double imu::getDeltaT() const {
         timeDiff[i]=this->relTimeSec[i+1]-this->relTimeSec[i];
     }
     double averageDeltaT = accumulate( timeDiff.begin(), timeDiff.end(), 0.0)/timeDiff.size();
-    std::cout<<"dt="<<averageDeltaT<<std::endl;
     return averageDeltaT;
 }
 

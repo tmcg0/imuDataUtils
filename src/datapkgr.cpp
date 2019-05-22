@@ -69,7 +69,6 @@ namespace datapkgr
                 // now loop over and set qs, qx, qy, qz
                 std::vector<double> qs(vecLen), qx(vecLen), qy(vecLen), qz(vecLen);
                 for(int i=0; i<vecLen; i++){
-                    std::cout<<"size="<<q[i].size()<<std::endl;
                     qs[i]=q[i][0];
                     qx[i]=q[i][1];
                     qy[i]=q[i][2];
