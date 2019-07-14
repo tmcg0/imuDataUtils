@@ -3,9 +3,9 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include <math.h>
-#include "testutils.h"
+#include "imuDataTestUtils.h"
 
-namespace testutils
+namespace imuDataTestUtils
 {
 
     std::string getTestDataDir(){
