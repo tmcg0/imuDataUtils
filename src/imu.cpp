@@ -17,6 +17,7 @@ imu::imu(std::string filePath, std::string labelName){
     this->label=myImuData.label;
     this->id=myImuData.id;
     if(myImuData.qx.size()>0){ // if orientation exists
+        this->qs=myImuData.qs; this->qx=myImuData.qx; this->qy=myImuData.qy; this->qz=myImuData.qz;
     }
 } // end constructor
 
@@ -39,6 +40,24 @@ unsigned long imu::length() const {
     return this->ax.size();
 }
 
+double imu::getDeltaT() const {
+    // loop through and find average delta T (seconds)
+    std::vector<double> timeDiff(this->length()-1);
+    for(int i=0; i<timeDiff.size(); i++){
+        timeDiff[i]=this->relTimeSec[i+1]-this->relTimeSec[i];
+    }
+    double averageDeltaT = accumulate( timeDiff.begin(), timeDiff.end(), 0.0)/timeDiff.size();
+    return averageDeltaT;
+}
+
+std::vector<std::vector<double>> imu::quaternion() const { // turn quaternion into vector<vector<double>>
+    std::vector<std::vector<double>> q(this->length());
+    for(int i=0; i<this->length();i++){
+        q[i]={qs[i],qx[i],qy[i],qz[i]};
+    }
+    return q;
+}
+
 imu imu::cutImuByIdx(const int& startIdx, const int& stopIdx){
     // cut imu data down and return the chopped imu--note that this copies the imu so the original input imu is not affected
     imu newImu=*this; // copy
@@ -54,6 +73,12 @@ imu imu::cutImuByIdx(const int& startIdx, const int& stopIdx){
     if(newImu.mz.size()>stopIdx){newImu.mz=slice(newImu.mz,startIdx,stopIdx);}
     if(newImu.unixTimeUtc.size()>stopIdx){newImu.unixTimeUtc=slice(newImu.unixTimeUtc,startIdx,stopIdx);}
     if(newImu.relTimeSec.size()>stopIdx){newImu.relTimeSec=slice(newImu.relTimeSec,startIdx,stopIdx);}
+    return newImu;
+}
+
+imu imu::cutImuByTime(const double& startTime, const double& stopTime){
+    imu newImu=*this; // copy
+    std::cout<<"need to implement this! simply convert time to closest idx and then call cutImuByIdx()"<<std::endl;
     return newImu;
 }
 
@@ -76,9 +101,10 @@ void imu::printLabelsInFile(std::string datafilestr){
     }
 }
 
-bool isUnixTimeSec(unsigned long time){
+bool imu::isUnixTimeSec(unsigned long time){
     // standard unix time is number of seconds since 12:00 am UTC on January 1, 1970.
     // 2536323034 is timestamp of May 19, 2050. note: code will error out after this date.
+    // double check your implementation here. might be wrong.
     unsigned long timeLimitSec=2536323034;
     if(time>0 && time<timeLimitSec){
         return true;
