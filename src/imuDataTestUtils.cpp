@@ -53,6 +53,29 @@ namespace imuDataTestUtils
         }
     }
 
+    void verifyDataPackaging(const imu& testImu, bool verbose){
+        // verify that the data is good. all same size.
+
+        int testLength=testImu.length(); // let's hope they're all this size
+        assert(testImu.ax.size()==testLength);
+        assert(testImu.ay.size()==testLength);
+        assert(testImu.az.size()==testLength);
+        assert(testImu.gx.size()==testLength);
+        assert(testImu.gy.size()==testLength);
+        assert(testImu.gz.size()==testLength);
+        assert(testImu.mx.size()==testLength);
+        assert(testImu.my.size()==testLength);
+        assert(testImu.mz.size()==testLength);
+        assert(testImu.relTimeSec.size()==testLength);
+        // now test quaternion
+        assert(testImu.qs.size()==testLength);
+        assert(testImu.qx.size()==testLength);
+        assert(testImu.qy.size()==testLength);
+        assert(testImu.qz.size()==testLength);
+        if(verbose){
+            std::cout<<"everything looks good with this imu."<<std::endl;
+        }
+    }
 
     double findVectorAverage(std::vector<double> vec, int startIdx, int endIdx){
         double avg=0.0;
