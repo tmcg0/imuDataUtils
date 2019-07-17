@@ -16,7 +16,8 @@ imu::imu(std::string filePath, std::string labelName){
     this->unixTimeUtc=myImuData.unixTimeUtcMicrosec;
     this->label=myImuData.label;
     this->id=myImuData.id;
-    if(myImuData.qx.size()>0){ // if orientation exists
+    if(myImuData.qx.size()>0){ // if orientation exists, set it
+        this->qs=myImuData.qs; this->qx=myImuData.qx; this->qy=myImuData.qy; this->qz=myImuData.qz;
     }
 } // end constructor
 

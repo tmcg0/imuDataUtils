@@ -54,8 +54,11 @@ if (BUILD_TESTS)
     # make unit tests
     add_executable(apdm_v5_unit_test test/test_apdm_v5.cpp)
     target_link_libraries(apdm_v5_unit_test imuutils ${IMUUTILSLIBS})
+    add_executable(imuClassUnitTest test/imuClassUnitTest.cpp)
+    target_link_libraries(imuClassUnitTest imuutils ${IMUUTILSLIBS})
     # add test runners
     add_test(run_apdm_v5_unit_test apdm_v5_unit_test)
+    add_test(run_imuClassUnitTest imuClassUnitTest)
 endif()
 
 if(BUILD_CMD_LINE_TOOL)
