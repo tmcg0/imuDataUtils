@@ -18,6 +18,7 @@ imu::imu(std::string filePath, std::string labelName){
     this->label=myImuData.label;
     this->id=myImuData.id;
     if(myImuData.qx.size()>0){ // if orientation exists
+        this->qs=myImuData.qs; this->qx=myImuData.qx; this->qy=myImuData.qy; this->qz=myImuData.qz;
     }
 } // end constructor
 
@@ -50,7 +51,7 @@ double imu::getDeltaT() const {
     return averageDeltaT;
 }
 
-std::vector<std::vector<double>> imu::quaternion(){ // turn quaternion into vector<vector<double>>
+std::vector<std::vector<double>> imu::quaternion() const { // turn quaternion into vector<vector<double>>
     std::vector<std::vector<double>> q(this->length());
     for(int i=0; i<this->length();i++){
         q[i]={qs[i],qx[i],qy[i],qz[i]};
@@ -76,6 +77,12 @@ imu imu::cutImuByIdx(const int& startIdx, const int& stopIdx){
     return newImu;
 }
 
+imu imu::cutImuByTime(const double& startTime, const double& stopTime){
+    imu newImu=*this; // copy
+    std::cout<<"need to implement this! simply convert time to closest idx and then call cutImuByIdx()"<<std::endl;
+    return newImu;
+}
+
 std::map<std::string,imu> imu::getImuMapFromDataFile(std::string filestr){
     // this static method constructs an imu map where the keys are the label std::strings of the imu
     std::vector<std::string> allLabels=datapkgr::getAllImuLabelsInDataFile(filestr);
@@ -95,9 +102,10 @@ void imu::printLabelsInFile(std::string datafilestr){
     }
 }
 
-bool isUnixTimeSec(unsigned long time){
+bool imu::isUnixTimeSec(unsigned long time){
     // standard unix time is number of seconds since 12:00 am UTC on January 1, 1970.
     // 2536323034 is timestamp of May 19, 2050. note: code will error out after this date.
+    // double check your implementation here. might be wrong.
     unsigned long timeLimitSec=2536323034;
     if(time>0 && time<timeLimitSec){
         return true;

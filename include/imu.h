@@ -14,12 +14,12 @@ public:
     std::vector<double> relTimeSec; // time of measurements, relative to zero in seconds
     std::vector<double> unixTimeUtc; // unix time stamp in seconds, utc
     int id; // unique id integer. in apdm sensors that looks like XI-000###
-    std::vector<std::vector<double>> quaternion(); // turn quaternion into vector<vector<double>>
+    std::vector<std::vector<double>> quaternion() const; // retrieve quaternion as vector<vector<double>>
     std::string label; // a label to uniquely id an imu in a set
     void print_sensor_maxmin();
     unsigned long length() const;
     imu cutImuByIdx(const int& startIdx, const int& stopIdx);
-    static imu cutImuByTime(double startTime, double stopTime);
+    imu cutImuByTime(const double& startTime, const double& stopTime);
     // --- public get methods --- //
     double getDeltaT() const;
     // --- public set methods --- //
@@ -27,8 +27,7 @@ public:
     // static member functions
     static std::map<std::string,imu> getImuMapFromDataFile(std::string filestr);
     static void printLabelsInFile(std::string datafilestr);
-
-    static bool isUnixTimeSec(int time); // is this a valid unix time in seconds?
+    static bool isUnixTimeSec(unsigned long time); // is this a valid unix time in seconds?
 
 }; // end classdef
 

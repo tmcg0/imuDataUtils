@@ -63,8 +63,20 @@ namespace datapkgr
                 }// for loop to store data
                 // now also pull out quaternion, if exists
                 std::vector<std::vector<double>> q;
+                bool quatExists=false;
                 if(processedGroup.getGroup(availSensorsStr[i]).exist("Orientation")){
                     q=get_2d_data_from_dataset(processedGroup.getGroup(availSensorsStr[i]).getDataSet("Orientation"));
+                    quatExists=true;
+                }
+                // now loop over and set qs, qx, qy, qz
+                std::vector<double> qs(vecLen), qx(vecLen), qy(vecLen), qz(vecLen);
+                if(quatExists) {
+                    for (int k = 0; k < vecLen; k++) {
+                        qs[k] = q[k][0];
+                        qx[k] = q[k][1];
+                        qy[k] = q[k][2];
+                        qz[k] = q[k][3];
+                    }
                 }
                 // now loop over and set qs, qx, qy, qz
                 std::vector<double> qs(vecLen), qx(vecLen), qy(vecLen), qz(vecLen);
@@ -84,6 +96,7 @@ namespace datapkgr
                 dataout.mx=mx; dataout.my=my; dataout.mz=mz;
                 dataout.qs=qs; dataout.qy=qy; dataout.qx=qx; dataout.qz=qz;
                 dataout.relTimeSec=t; dataout.unixTimeUtcMicrosec=unixTimeUtcMicroseconds;
+                if(quatExists){dataout.qs=qs; dataout.qy=qy; dataout.qx=qx; dataout.qz=qz;}
                 //dataout.orientation=orientation_Rot3;
                 dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
                 dataout.id=std::stoi(availSensorsStr[i]);
