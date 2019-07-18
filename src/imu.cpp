@@ -12,6 +12,7 @@ imu::imu(std::string filePath, std::string labelName){
     this->ax=myImuData.ax; this->ay=myImuData.ay; this->az=myImuData.az;
     this->gx=myImuData.gx; this->gy=myImuData.gy; this->gz=myImuData.gz;
     this->mx=myImuData.mx; this->my=myImuData.my; this->mz=myImuData.mz;
+    this->qs=myImuData.qs; this->qx=myImuData.qx; this->qy=myImuData.qy; this->qz=myImuData.qz;
     this->relTimeSec=myImuData.relTimeSec;
     this->unixTimeUtc=myImuData.unixTimeUtcMicrosec;
     this->label=myImuData.label;

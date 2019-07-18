@@ -15,7 +15,7 @@ int main(){
     std::string imuFileOut=imuDataTestUtils::getProjectRootDir()+"/test/output/testfile.h5";
     datapkgr::writeImuToApdmOpalH5File(cutImu,imuFileOut);
     // read chopped imu back
-    std::map<std::string,imu> ImuMap2=imu::getImuMapFromDataFile(imuFileOut);
+    std::map<std::string,imu> ImuMap2=imu::getImuMapFromDataFile(imuFileOut); // todo: this error because I'm not yet writing the quaternion out when I call datapkgr::writeImuToApdmOpalH5File
     // NOW: try to write entire imu map back to file
     std::string imuMapFileOut=imuDataTestUtils::getProjectRootDir()+"/test/output/testfilemap.h5";
     datapkgr::writeImuToApdmOpalH5File(ImuMap,imuMapFileOut);
