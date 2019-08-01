@@ -410,7 +410,8 @@ std::string get_sensor_label_from_apdm_v5_by_sensor_number(std::string filename,
         std::string date_str;
         attr_date.read(stype, date_str);
         return date_str;
-    }else{std::cout<<"ERROR: label not found..."<<std::endl;}
+    }else{std::cerr<<"ERROR: label not found..."<<std::endl;}
+    return "ERROR: label not found!";
 }
 
 
