@@ -78,14 +78,6 @@ namespace datapkgr
                         qz[k] = q[k][3];
                     }
                 }
-                // now loop over and set qs, qx, qy, qz
-                std::vector<double> qs(vecLen), qx(vecLen), qy(vecLen), qz(vecLen);
-                for(int i=0; i<vecLen; i++){
-                    qs[i]=q[i][0];
-                    qx[i]=q[i][1];
-                    qy[i]=q[i][2];
-                    qz[i]=q[i][3];
-                }
                 //std::vector<Eigen::Vector4d> qAPDM=rotutils::VectorVectorDoubleToVectorEigenVector(qAPDM0);
                 //std::vector<gtsam::Rot3> orientation_Rot3=rotutils::QuaternionVectorToRot3Vector(qAPDM); // q[NWU->L]
                 // remember: Eigen::Quaternion stores scalar component last
