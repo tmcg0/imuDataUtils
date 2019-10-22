@@ -91,7 +91,7 @@ namespace datapkgr
                 if(quatExists){dataout.qs=qs; dataout.qy=qy; dataout.qx=qx; dataout.qz=qz;}
                 //dataout.orientation=orientation_Rot3;
                 dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
-                dataout.id=std::stoi(availSensorsStr[i]);
+                try {dataout.id=std::stoi(availSensorsStr[i]);} catch (const std::exception& e) {std::cout<<"failed to add IMU id. common cause is compiler problems."<<std::endl;}
                 sensorFoundByLabel=true;
                 return dataout;
             } // if is the right label
