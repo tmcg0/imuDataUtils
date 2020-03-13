@@ -14,6 +14,7 @@
 #include "highfive/H5DataSpace.hpp"
 #include "highfive/H5Group.hpp"
 #include <exception>
+#include <regex>
 
 namespace h5=HighFive;
 
@@ -24,6 +25,7 @@ void print_group_children(h5::Group groupName);
 bool is_group_a_dataset(std::string childGroupToTest);
 std::string get_sensor_label_from_apdm_v5_by_sensor_number(std::string filename, std::string sensorNumber);
 void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite);
+int imuSensorStrToInt(const std::string& str);
 
 namespace datapkgr
 {
@@ -91,7 +93,7 @@ namespace datapkgr
                 if(quatExists){dataout.qs=qs; dataout.qy=qy; dataout.qx=qx; dataout.qz=qz;}
                 //dataout.orientation=orientation_Rot3;
                 dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
-                try {dataout.id=std::stoi(availSensorsStr[i]);} catch (const std::exception& e) {std::cout<<"failed to add IMU id. common cause is compiler problems."<<std::endl;}
+                dataout.id=imuSensorStrToInt(availSensorsStr[i]);
                 sensorFoundByLabel=true;
                 return dataout;
             } // if is the right label
@@ -304,6 +306,13 @@ H5F_ACC_RDWR: Existing file is opened with read-write access. If file does not e
  */
 
 // -------------- helper functions ---------------
+int imuSensorStrToInt(const std::string& str){
+    // takes in example string, like XI-0023412 and converts it to int
+    std::string numeric = std::regex_replace(str, std::regex(R"([\D])"), "");
+    int id=std::stoi(numeric);
+    return id;
+}
+
 void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite){
     std::vector<size_t> TwoDdims={imuToWrite.length(),3}; // set the sizes of the Nx3 2D datasets to write
     std::vector<size_t> OneDdims={imuToWrite.length()}; // set the sizes of the N 1D datasets to write
