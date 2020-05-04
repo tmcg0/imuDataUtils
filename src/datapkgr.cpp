@@ -27,11 +27,11 @@ std::string get_sensor_label_from_apdm_v5_by_sensor_number(std::string filename,
 void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite);
 int imuSensorStrToInt(const std::string& str);
 
-namespace datapkgr
-{
-    imudata readSingleImuDataFromApdmOpalH5FileByLabel(std::string filestr, std::string label){
+namespace datapkgr{
+
+    imudata readSingleImuDataFromApdmOpalH5FileByLabel(const std::string& filestr, const std::string& label){
         if (!is_apdm_h5_version5(filestr)){
-                std::cout<<"this is not a valid v5 apdm .h5 file"<<std::endl;
+            throw std::runtime_error("this is not a valid v5 apdm .h5 file");
         }
         // for h5 file structure for APDM see: http://share.apdm.com/documentation/TechnicalGuide.pdf
         h5::File file(filestr, h5::File::ReadOnly);
@@ -41,10 +41,10 @@ namespace datapkgr
         std::vector<std::string> availSensorsStr=sensorsGroup.listObjectNames();
         // now loop through availSensors and construct imu objects and write data
         bool sensorFoundByLabel=false;
-        for(int i=0;i<availSensorsStr.size();i++){
+        for(auto & currentLabel : availSensorsStr){
             // check if label is correct
-            if (get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i])==label){
-                h5::Group currentSensorGroup=sensorsGroup.getGroup(availSensorsStr[i]);
+            if (get_sensor_label_from_apdm_v5_by_sensor_number(filestr, currentLabel)==label){ // you've found the correct label, continue
+                h5::Group currentSensorGroup=sensorsGroup.getGroup(currentLabel);
                 //vector<string> childGroups=listPureGroupNames(currentSensorGroup);
                 //print_group_children(currentSensorGroup);
                 // set std::vector<double> of sensor data
@@ -66,8 +66,8 @@ namespace datapkgr
                 // now also pull out quaternion, if exists
                 std::vector<std::vector<double>> q;
                 bool quatExists=false;
-                if(processedGroup.getGroup(availSensorsStr[i]).exist("Orientation")){
-                    q=get_2d_data_from_dataset(processedGroup.getGroup(availSensorsStr[i]).getDataSet("Orientation"));
+                if(processedGroup.getGroup(currentLabel).exist("Orientation")){
+                    q=get_2d_data_from_dataset(processedGroup.getGroup(currentLabel).getDataSet("Orientation"));
                     quatExists=true;
                 }
                 // now loop over and set qs, qx, qy, qz
@@ -92,14 +92,14 @@ namespace datapkgr
                 dataout.relTimeSec=t; dataout.unixTimeUtcMicrosec=unixTimeUtcMicroseconds;
                 if(quatExists){dataout.qs=qs; dataout.qy=qy; dataout.qx=qx; dataout.qz=qz;}
                 //dataout.orientation=orientation_Rot3;
-                dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
-                dataout.id=imuSensorStrToInt(availSensorsStr[i]);
+                dataout.label=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, currentLabel);
+                dataout.id=imuSensorStrToInt(currentLabel);
                 sensorFoundByLabel=true;
                 return dataout;
             } // if is the right label
         } // finished loop over sensors
         if (!sensorFoundByLabel){
-            std::cerr<<"ERROR: sensor not found!"<<std::endl;
+            throw std::runtime_error("ERROR: sensor not found!");
         }
     } // end function
 
@@ -176,8 +176,8 @@ namespace datapkgr
             std::vector<std::string> row(colsPerImu);
             row[0]=it->first; // make first entry the label
             row[1]="hardwareIdHere";
-            for(int i=0;i<row.size();i++){
-                myfile<<row[i]; myfile<<",";
+            for(auto & i : row){
+                myfile<<i; myfile<<",";
             }
             it++;
         }
@@ -185,14 +185,14 @@ namespace datapkgr
         // now write data headers
         auto it2 = imuMapToWrite.begin();
         while(it2!=imuMapToWrite.end()){
-            for(int i=0;i<colHeaders.size();i++){
-                myfile<<colHeaders[i]; myfile<<",";
+            for(auto & colHeader : colHeaders){
+                myfile<<colHeader; myfile<<",";
             }
             it2++;
         }
         myfile<<"\n";
         // now write actual data, looping through imus
-        int nMeas=((imuMapToWrite.begin())->second).length();
+        uint nMeas=((imuMapToWrite.begin())->second).length();
         std::map<std::string, imu>::const_iterator it3;
         for(int measIdx=0;measIdx<nMeas;measIdx++){
             for(it3 = imuMapToWrite.begin(); it3!=imuMapToWrite.end(); it3++){
@@ -225,11 +225,10 @@ namespace datapkgr
         return 0;
     }
 
-    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, const int& startIdx, const int& stopIdx){
+    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, uint startIdx, uint stopIdx){
         std::map<std::string,imu> ImuMapCut;
         auto it = ImuMap.begin();
-        while (it != ImuMap.end())
-        {
+        while (it != ImuMap.end()) {
             imu originalImu=(it->second);
             imu cutImu=originalImu.cutImuByIdx(startIdx,stopIdx);
             std::string word = it->first;
@@ -240,7 +239,7 @@ namespace datapkgr
         return ImuMapCut;
     }
 
-    std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr){
+    std::vector<std::string> getAllImuLabelsInDataFile(const std::string& filestr){
         std::vector<std::string> allLabels;
         if (is_apdm_h5_version5(filestr)){
             // you have a version 5 APDM data file. we'll use this.

@@ -2,11 +2,6 @@
 #include "imu.h"
 #include "datapkgr.h"
 
-
-imu::imu(std::string filePath, int readIdx){
-    //todo: make this
-}
-
 imu::imu(std::string filePath, std::string labelName){
     imudata myImuData=datapkgr::readSingleImuDataFromApdmOpalH5FileByLabel(filePath, labelName);
     this->ax=myImuData.ax; this->ay=myImuData.ay; this->az=myImuData.az;
@@ -44,7 +39,7 @@ unsigned long imu::length() const {
 double imu::getDeltaT() const {
     // loop through and find average delta T (seconds)
     std::vector<double> timeDiff(this->length()-1);
-    for(int i=0; i<timeDiff.size(); i++){
+    for(uint i=0; i<timeDiff.size(); i++){
         timeDiff[i]=this->relTimeSec[i+1]-this->relTimeSec[i];
     }
     double averageDeltaT = accumulate( timeDiff.begin(), timeDiff.end(), 0.0)/timeDiff.size();
@@ -59,7 +54,7 @@ std::vector<std::vector<double>> imu::quaternion() const { // turn quaternion in
     return q;
 }
 
-imu imu::cutImuByIdx(const int& startIdx, const int& stopIdx){
+imu imu::cutImuByIdx(uint startIdx, uint stopIdx){
     // cut imu data down and return the chopped imu--note that this copies the imu so the original input imu is not affected
     imu newImu=*this; // copy
     // now go through the imu data fields and chop down by indexes in the new imu
@@ -77,27 +72,27 @@ imu imu::cutImuByIdx(const int& startIdx, const int& stopIdx){
     return newImu;
 }
 
-imu imu::cutImuByTime(const double& startTime, const double& stopTime){
+imu imu::cutImuByTime(double startTime, double stopTime){
     imu newImu=*this; // copy
     std::cout<<"need to implement this! simply convert time to closest idx and then call cutImuByIdx()"<<std::endl;
     return newImu;
 }
 
-std::map<std::string,imu> imu::getImuMapFromDataFile(std::string filestr){
+std::map<std::string,imu> imu::getImuMapFromDataFile(const std::string& filestr){
     // this static method constructs an imu map where the keys are the label std::strings of the imu
     std::vector<std::string> allLabels=datapkgr::getAllImuLabelsInDataFile(filestr);
     std::map<std::string,imu> ImuMap;
-    for(int i=0;i<allLabels.size();i++){ // now create map
-        imu tempImu(filestr,allLabels[i]);
-        ImuMap.insert(std::pair<std::string,imu>(allLabels[i],tempImu));
+    for(auto & label : allLabels){ // now create map
+        imu tempImu(filestr,label);
+        ImuMap.insert(std::pair<std::string,imu>(label,tempImu));
     }
     return ImuMap;
 }
 
-void imu::printLabelsInFile(std::string datafilestr){
+void imu::printLabelsInFile(const std::string& datafilestr){
     // prints all imu labels from given file
     std::vector<std::string> allLabels=datapkgr::getAllImuLabelsInDataFile(datafilestr);
-    for(int i=0;i<allLabels.size();i++){ // now create map
+    for(uint i=0;i<allLabels.size();i++){ // now create map
         std::cout<<"imu label "<<i<<": "<<allLabels[i]<<std::endl;
     }
 }
@@ -107,14 +102,5 @@ bool imu::isUnixTimeSec(unsigned long time){
     // 2536323034 is timestamp of May 19, 2050. note: code will error out after this date.
     // double check your implementation here. might be wrong.
     unsigned long timeLimitSec=2536323034;
-    if(time>0 && time<timeLimitSec){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-int getNearestIdxFromUnixTimeUtc(int unixTimeUtc){
-    //
-
+    return time > 0 && time < timeLimitSec;
 }

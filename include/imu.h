@@ -8,7 +8,6 @@ class imu {
 public:
     // constructors
     imu()=default; // empty constructor
-    imu(std::string filePath, int readIdx); // construct from .h5 file
     imu(std::string filePath, std::string labelName); // construct a single imu from a label name in .h5 file
     std::vector<double> gx, gy, gz, ax, ay, az, mx, my, mz, qs, qx, qy, qz; // IMU sensor data arrays
     std::vector<double> relTimeSec; // time of measurements, relative to zero in seconds
@@ -18,25 +17,21 @@ public:
     std::string label; // a label to uniquely id an imu in a set
     void print_sensor_maxmin();
     unsigned long length() const;
-    imu cutImuByIdx(const int& startIdx, const int& stopIdx);
-    imu cutImuByTime(const double& startTime, const double& stopTime);
-    // --- public get methods --- //
+    imu cutImuByIdx(uint startIdx, uint stopIdx);
+    imu cutImuByTime(double startTime, double stopTime);
     double getDeltaT() const;
-    // --- public set methods --- //
 
     // static member functions
-    static std::map<std::string,imu> getImuMapFromDataFile(std::string filestr);
-    static void printLabelsInFile(std::string datafilestr);
+    static std::map<std::string,imu> getImuMapFromDataFile(const std::string& filestr);
+    static void printLabelsInFile(const std::string& datafilestr);
     static bool isUnixTimeSec(unsigned long time); // is this a valid unix time in seconds?
 
 }; // end classdef
 
 template<typename T>
-std::vector<T> slice(std::vector<T> const &v, int m, int n)
-{
+std::vector<T> slice(std::vector<T> const &v, int m, int n){
     auto first = v.cbegin() + m;
     auto last = v.cbegin() + n + 1;
-
     std::vector<T> vec(first, last);
     return vec;
 }

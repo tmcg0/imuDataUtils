@@ -9,7 +9,5 @@ namespace imuDataTestUtils
     std::string getTestDataDir();
     std::string getProjectRootDir();
     std::string getTestDataFile(std::string filename);
-    double findVectorAverage(std::vector<double> vec, int startIdx, int endIdx);
-    std::string getDropboxRoot();
     void verifyDataPackaging(const imu& testImu, bool verbose=false);
 }

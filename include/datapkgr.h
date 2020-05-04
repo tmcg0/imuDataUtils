@@ -9,13 +9,12 @@
 
 namespace h5=HighFive;
 
-namespace datapkgr
-{
-    imudata readSingleImuDataFromApdmOpalH5FileByLabel(std::string filestr, std::string label);
-    std::vector<std::string> getAllImuLabelsInDataFile(std::string filestr);
+namespace datapkgr{
+    imudata readSingleImuDataFromApdmOpalH5FileByLabel(const std::string& filestr, const std::string& label);
+    std::vector<std::string> getAllImuLabelsInDataFile(const std::string& filestr);
     int apdmh5ToCsv(const std::string& apdmH5File, const std::string& csvFileToWrite);
     int writeImuMapToCsv(const std::map<std::string,imu>& imuMapToWrite, const std::string& csvFileToWrite);
-    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, const int& startIdx, const int& stopIdx);
+    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, uint startIdx, uint stopIdx);
     void writeImuToApdmOpalH5File(const imu& imuToWrite, const std::string& h5Filename);
     void writeImuToApdmOpalH5File(const std::map<std::string,imu>& imuMapToWrite, const std::string& h5Filename);
     bool is_apdm_h5_version5(std::string filestr);

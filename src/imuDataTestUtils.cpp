@@ -1,8 +1,6 @@
-
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
-#include <math.h>
 #include "imuDataTestUtils.h"
 
 namespace imuDataTestUtils
@@ -42,17 +40,6 @@ namespace imuDataTestUtils
         }
     }
 
-    std::string getDropboxRoot(){
-        // return dropbox root directory. also checks if directory exists (this is poor man's check for machine ID--only Tim can run the experimental data tests)
-        boost::filesystem::path dropboxRoot="/home/tmcgrath/Dropbox (MIT)/";
-        if(boost::filesystem::is_directory(dropboxRoot)){ // you found a valid dropbox root
-            return dropboxRoot.string();
-        }else{ // couldn't find this path. are you sure you're on one of Tim's machines?
-            std::cout<<"ERROR: could not find dropbox root. Are you sure you're on one of Tim's machines?"<<std::endl;
-            return "";
-        }
-    }
-
     void verifyDataPackaging(const imu& testImu, bool verbose){
         // verify that the data is good. all same size.
 
@@ -77,12 +64,4 @@ namespace imuDataTestUtils
         }
     }
 
-    double findVectorAverage(std::vector<double> vec, int startIdx, int endIdx){
-        double avg=0.0;
-        for(int i=startIdx; i<=endIdx; i++){
-            avg+=vec[i];
-        }
-        avg/=(endIdx-startIdx);
-        return avg;
-    }
 } // namespace
