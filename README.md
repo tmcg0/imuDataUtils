@@ -1,8 +1,9 @@
-# imuDataPkgr
+# imuDataUtils
 
 ##### A general C++ class and functions for constructing and holding IMU data
 Class ```imu``` represents a generic class to hold IMU data. It may be constructed directly or a map may be created to map the IMU to its label. ```datapkgr``` namepspace handles this. It also provides an extended contructor for ```imu``` to conveniently construct that map from an IMU file.
 
+**Important note**: imuDataUtils does not perform estimation of any sort on IMU data. Its purpose is to simply read, write, and hold IMU data across different sources. It is intended to be a useful subcomponent of larger estimation frameworks.
 
 ## Executables
 ##### In the /exe/ folder you'll find the source code for 3 executables which are built by CMake:
