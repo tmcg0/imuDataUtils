@@ -48,7 +48,7 @@ double imu::getDeltaT() const {
 
 std::vector<std::vector<double>> imu::quaternion() const { // turn quaternion into vector<vector<double>>
     std::vector<std::vector<double>> q(this->length());
-    for(int i=0; i<this->length();i++){
+    for(uint i=0; i<this->length();i++){
         q[i]={qs[i],qx[i],qy[i],qz[i]};
     }
     return q;
@@ -56,7 +56,7 @@ std::vector<std::vector<double>> imu::quaternion() const { // turn quaternion in
 
 imu imu::cutImuByIdx(uint startIdx, uint stopIdx){
     // cut imu data down and return the chopped imu--note that this copies the imu so the original input imu is not affected
-    imu newImu=*this; // copy
+    imu newImu=imu(*this); // copy
     // now go through the imu data fields and chop down by indexes in the new imu
     if(newImu.gx.size()>stopIdx){newImu.gx=slice(newImu.gx,startIdx,stopIdx);}
     if(newImu.gy.size()>stopIdx){newImu.gy=slice(newImu.gy,startIdx,stopIdx);}

@@ -42,23 +42,22 @@ namespace imuDataTestUtils
 
     void verifyDataPackaging(const imu& testImu, bool verbose){
         // verify that the data is good. all same size.
-
-        int testLength=testImu.length(); // let's hope they're all this size
-        assert(testImu.ax.size()==testLength);
-        assert(testImu.ay.size()==testLength);
-        assert(testImu.az.size()==testLength);
-        assert(testImu.gx.size()==testLength);
-        assert(testImu.gy.size()==testLength);
-        assert(testImu.gz.size()==testLength);
-        assert(testImu.mx.size()==testLength);
-        assert(testImu.my.size()==testLength);
-        assert(testImu.mz.size()==testLength);
-        assert(testImu.relTimeSec.size()==testLength);
+        uint testLength=testImu.length(); // let's hope they're all this size
+        if(testImu.ax.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.ay.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.az.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.gx.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.gy.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.gz.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.mx.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.my.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.mz.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.relTimeSec.size()!=testLength){throw std::runtime_error("inconsistent size.");}
         // now test quaternion
-        assert(testImu.qs.size()==testLength);
-        assert(testImu.qx.size()==testLength);
-        assert(testImu.qy.size()==testLength);
-        assert(testImu.qz.size()==testLength);
+        if(testImu.qs.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.qx.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.qy.size()!=testLength){throw std::runtime_error("inconsistent size.");}
+        if(testImu.qz.size()!=testLength){throw std::runtime_error("inconsistent size.");}
         if(verbose){
             std::cout<<"everything looks good with this imu."<<std::endl;
         }

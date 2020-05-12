@@ -14,7 +14,7 @@ namespace datapkgr{
     std::vector<std::string> getAllImuLabelsInDataFile(const std::string& filestr);
     int apdmh5ToCsv(const std::string& apdmH5File, const std::string& csvFileToWrite);
     int writeImuMapToCsv(const std::map<std::string,imu>& imuMapToWrite, const std::string& csvFileToWrite);
-    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, uint startIdx, uint stopIdx);
+    std::map<std::string,imu> cutImuMapByIdx(const std::map<std::string,imu>& ImuMap, uint startIdx, uint stopIdx); // copies
     void writeImuToApdmOpalH5File(const imu& imuToWrite, const std::string& h5Filename);
     void writeImuToApdmOpalH5File(const std::map<std::string,imu>& imuMapToWrite, const std::string& h5Filename);
     bool is_apdm_h5_version5(std::string filestr);

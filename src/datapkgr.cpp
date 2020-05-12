@@ -101,6 +101,7 @@ namespace datapkgr{
         if (!sensorFoundByLabel){
             throw std::runtime_error("ERROR: sensor not found!");
         }
+        return imudata(); // should never get here.
     } // end function
 
     void writeImuToApdmOpalH5File(const imu& imuToWrite, const std::string& h5Filename){
@@ -146,9 +147,9 @@ namespace datapkgr{
     }
 
     std::vector<std::vector<double>> makeNestedVector(const std::vector<double>& data1, const std::vector<double>& data2, const std::vector<double>& data3){
-        assert(data1.size()==data2.size() && data1.size()==data3.size());
+        if(data1.size()!=data2.size() || data1.size()!=data3.size()){throw std::runtime_error("inconsistent data sizes.");}
         std::vector<std::vector<double>> returnVector(data1.size());
-        for(int i=0; i<data1.size(); i++){
+        for(uint i=0; i<data1.size(); i++){
             std::vector<double> rowVec={data1[i],data2[i],data3[i]};
             returnVector[i]=rowVec;
         }
@@ -194,7 +195,7 @@ namespace datapkgr{
         // now write actual data, looping through imus
         uint nMeas=((imuMapToWrite.begin())->second).length();
         std::map<std::string, imu>::const_iterator it3;
-        for(int measIdx=0;measIdx<nMeas;measIdx++){
+        for(uint measIdx=0;measIdx<nMeas;measIdx++){
             for(it3 = imuMapToWrite.begin(); it3!=imuMapToWrite.end(); it3++){
                 if(it3->second.unixTimeUtc.size()==0){
                     myfile<<"nan,";
@@ -219,13 +220,12 @@ namespace datapkgr{
     }
 
     int apdmCaseIdStringToInt(const std::string &caseId){
-        // iter
         std::cout<<"case id: "<<caseId<<std::endl;
-        int asdf=234;
+        throw std::runtime_error("implement this or deprecate!");
         return 0;
     }
 
-    std::map<std::string,imu> cutImuMapByIdx(std::map<std::string,imu>& ImuMap, uint startIdx, uint stopIdx){
+    std::map<std::string,imu> cutImuMapByIdx(const std::map<std::string,imu>& ImuMap, uint startIdx, uint stopIdx){
         std::map<std::string,imu> ImuMapCut;
         auto it = ImuMap.begin();
         while (it != ImuMap.end()) {
@@ -233,8 +233,7 @@ namespace datapkgr{
             imu cutImu=originalImu.cutImuByIdx(startIdx,stopIdx);
             std::string word = it->first;
             ImuMapCut.insert(std::pair<std::string,imu>(it->first,cutImu));
-            // Increment the Iterator to point to next entry
-            it++;
+            it++; // increment the Iterator to point to next entry
         }
         return ImuMapCut;
     }
@@ -248,7 +247,7 @@ namespace datapkgr{
             h5::Group sensorsGroup=rootGroup.getGroup("Sensors");
             std::vector<std::string> availSensorsStr=sensorsGroup.listObjectNames();
             // now loop through availSensors and construct imu objects and write data
-            for(int i=0;i<availSensorsStr.size();i++){
+            for(uint i=0;i<availSensorsStr.size();i++){
                 h5::Group currentSensorGroup=sensorsGroup.getGroup(availSensorsStr[i]);
                 std::vector<std::string> sensorAttributes=currentSensorGroup.getGroup("Configuration").listAttributeNames();
                 std::string lbl=get_sensor_label_from_apdm_v5_by_sensor_number(filestr, availSensorsStr[i]);
@@ -277,20 +276,20 @@ namespace datapkgr{
     }
 
     int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>){
-
+        throw std::runtime_error("unimplemented");
         return 0;
     }
 
     bool is_apdm_h5_version5(std::string filestr){
             // is this a version 5 apdm file?
             try{
-                    h5::File file(filestr, h5::File::ReadOnly);
-                    h5::Group rootGroup=file.getGroup("/");
-                    std::vector<std::string> rootAttrs=rootGroup.listAttributeNames();
-                    h5::Attribute at=rootGroup.getAttribute(rootAttrs[0]);
-                    int fileFormatVer;
-                    at.read(fileFormatVer);
-                    if (fileFormatVer==5){return true;}
+                h5::File file(filestr, h5::File::ReadOnly);
+                h5::Group rootGroup=file.getGroup("/");
+                std::vector<std::string> rootAttrs=rootGroup.listAttributeNames();
+                h5::Attribute at=rootGroup.getAttribute(rootAttrs[0]);
+                int fileFormatVer;
+                at.read(fileFormatVer);
+                return fileFormatVer == 5;
             }catch(std::exception& e){}
             return false;
     } // end func
@@ -363,10 +362,10 @@ std::vector<std::string> listPureGroupNames(h5::Group groupName){
         // will return valid groups (not datasets!)
         std::vector <std::string> childGroups;
         std::vector<std::string> childObjects=groupName.listObjectNames();
-        for(int i=0;i<childObjects.size();i++){
-                if (!is_group_a_dataset(childObjects[i])){ // not a dataset, so add it
-                    childGroups.push_back(childObjects[i]);
-                }
+        for(uint i=0;i<childObjects.size();i++){
+            if (!is_group_a_dataset(childObjects[i])){ // not a dataset, so add it
+                childGroups.push_back(childObjects[i]);
+            }
         }
         return childGroups;
 }
@@ -375,7 +374,7 @@ std::vector<std::string> listDatasetNames(h5::Group groupName){
     // will return valid groups (not datasets!)
     std::vector <std::string> childGroups;
     std::vector<std::string> childObjects=groupName.listObjectNames();
-    for(int i=0;i<childObjects.size();i++){
+    for(uint i=0;i<childObjects.size();i++){
         if (is_group_a_dataset(childObjects[i])){ // is a dataset, so add it
             childGroups.push_back(childObjects[i]);
         }
@@ -395,19 +394,19 @@ bool is_group_a_dataset(std::string childGroupToTest){
 
 
 void print_group_children(h5::Group groupName){
-        std::vector<std::string> groupStr=listPureGroupNames(groupName);
-        std::vector<std::string> datasetStr=listDatasetNames(groupName);
-        std::vector<std::string> attrStr=groupName.listAttributeNames();
-        std::cout<<"Children of group: "<<groupName.getId()<<std::endl;
-        for(int i=0;i<groupStr.size();i++){
-                std::cout<<"   (pure group) "<<groupStr[i]<<std::endl;
-        }
-        for(int i=0;i<datasetStr.size();i++){
-                std::cout<<"   (  dataset ) "<<datasetStr[i]<<std::endl;
-        }
-        for(int i=0;i<attrStr.size();i++){
-            std::cout<<"   (attribute ) "<<attrStr[i]<<std::endl;
-        }
+    std::vector<std::string> groupStr=listPureGroupNames(groupName);
+    std::vector<std::string> datasetStr=listDatasetNames(groupName);
+    std::vector<std::string> attrStr=groupName.listAttributeNames();
+    std::cout<<"Children of group: "<<groupName.getId()<<std::endl;
+    for(uint i=0;i<groupStr.size();i++){
+        std::cout<<"   (pure group) "<<groupStr[i]<<std::endl;
+    }
+    for(uint i=0;i<datasetStr.size();i++){
+        std::cout<<"   (  dataset ) "<<datasetStr[i]<<std::endl;
+    }
+    for(uint i=0;i<attrStr.size();i++){
+        std::cout<<"   (attribute ) "<<attrStr[i]<<std::endl;
+    }
 }
 
 std::string get_sensor_label_from_apdm_v5_by_sensor_number(std::string filename, std::string sensorNumber){
@@ -425,7 +424,10 @@ std::string get_sensor_label_from_apdm_v5_by_sensor_number(std::string filename,
 
 
 std::string get_string_attribute_from_group(h5::Group groupName, std::string attrString){
-
+    throw std::runtime_error("implement this");
+    return "";
+    /*
+    // commenting out unused stuff right now to avoid build warnings
     std::vector<std::string> allAttributes=groupName.listAttributeNames();
     bool is_valid_attr=find(allAttributes.begin(), allAttributes.end(), attrString) != allAttributes.end();
     if (!is_valid_attr){
@@ -435,9 +437,7 @@ std::string get_string_attribute_from_group(h5::Group groupName, std::string att
     int attrIdx = distance(allAttributes.begin(), find(allAttributes.begin(), allAttributes.end(), attrString));
     h5::Attribute foundAttr=groupName.getAttribute(attrString);
     h5::DataType dt=foundAttr.getDataType();
-    for (std::vector<std::string>::const_iterator it =
-            allAttributes.begin();
-         it < allAttributes.end(); ++it) {
+    for (std::vector<std::string>::const_iterator it = allAttributes.begin(); it < allAttributes.end(); ++it) {
         std::cout << "attribute: " << *it << std::endl;
     }
     bool dateAtribExists = H5Aexists(groupName.getId(),"Label 0");
@@ -453,10 +453,9 @@ std::string get_string_attribute_from_group(h5::Group groupName, std::string att
     std::cout<<"reading attribute as: "<<H5Aread(attributeHandler,attributeType,&readAttribute)<<std::endl;
     std::cout<<"reading attribute2 as: "<<H5Aread(attributeHandler2,atype,&readAttribute)<<std::endl;
     bool hasAttribute=groupName.hasAttribute(attrString);
-    int asdfas=234234;
     foundAttr.read(readAttribute);
 
-    /*
+
     vector<string> rootAttrs=rootGroup.listAttributeNames();
     h5::Attribute at=rootGroup.getAttribute(rootAttrs[0]);
     int fileFormatVer;
