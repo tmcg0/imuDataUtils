@@ -47,7 +47,7 @@ namespace datapkgr{
                 std::vector<std::vector<double>> dataAccel=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Accelerometer"));
                 std::vector<std::vector<double>> dataGyro=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Gyroscope"));
                 std::vector<std::vector<double>> dataMag=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Magnetometer"));
-                std::vector<double> unixTimeUtcMicroseconds=get_1d_data_from_dataset(currentSensorGroup.getDataSet("Time"));
+                std::vector<uint> unixTimeUtcMicroseconds=get_1d_data_from_dataset<uint>(currentSensorGroup.getDataSet("Time"));
                 // now loop through and set data
                 int vecLen=dataAccel.size();
                 std::vector<double> ax(vecLen), ay(vecLen), az(vecLen), gx(vecLen), gy(vecLen), gz(vecLen), mx(vecLen), my(vecLen), mz(vecLen);
@@ -264,12 +264,6 @@ namespace datapkgr{
         return datavec2;
     }
 
-    std::vector<double> get_1d_data_from_dataset(const h5::DataSet& ds){
-        // simple function to return 1d dataset as vector of doubles
-        std::vector<double> datavec1;
-        ds.read(datavec1);
-        return datavec1;
-    }
 
     int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>){
         throw std::runtime_error("unimplemented");
