@@ -52,6 +52,8 @@ find_package(HDF5 REQUIRED)
 add_definitions(${HDF5_DEFINITIONS})
 include_directories(${HDF5_INCLUDE_DIR})
 list(APPEND IMUDATAUTILSLIBS ${HDF5_LIBRARIES})
+# --- Require HighFive --- #
+find_package(HighFive REQUIRED)
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -63,6 +65,7 @@ message(STATUS "sources are ${SOURCES_IMUDATAUTILS}")
 # create and link library
 add_library(imuDataUtils SHARED ${SOURCES_IMUDATAUTILS})
 target_link_libraries(imuDataUtils ${IMUDATAUTILSLIBS})
+target_link_libraries(imuDataUtils HighFive)
 message(STATUS "Libs that we have for imuDataUtils are ${IMUDATAUTILSLIBS} ")
 
 # make tests for CTest environment

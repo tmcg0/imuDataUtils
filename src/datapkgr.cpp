@@ -7,14 +7,10 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include <fstream>
-// highfive includes
-#include "highfive/H5Attribute.hpp"
-#include "highfive/H5DataSet.hpp"
-#include "highfive/H5File.hpp"
-#include "highfive/H5DataSpace.hpp"
-#include "highfive/H5Group.hpp"
 #include <exception>
 #include <regex>
+// highfive includes
+#include <highfive/H5File.hpp>
 
 namespace h5=HighFive;
 
@@ -321,7 +317,7 @@ void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite){
         h5::Attribute fileFormatVerAttr = file.createAttribute<int>("FileFormatVersion", h5::DataSpace::From(5));
         fileFormatVerAttr.write(5);
     }
-    h5::Group Processed;
+    h5::Group Processed=file.getGroup("/");
     if(file.exist("Processed")){
         Processed=file.getGroup("Processed");
     }else{
@@ -329,7 +325,7 @@ void apdmH5FileFormatAddImuToFile(h5::File &file, imu imuToWrite){
     }
     h5::Group thisProcessed=Processed.createGroup(idStr);
     // todo: add processed quaternion data
-    h5::Group Sensors;
+    h5::Group Sensors=file.getGroup("/");
     if(file.exist("Sensors")){
         Sensors=file.getGroup("Sensors");
     }else{
