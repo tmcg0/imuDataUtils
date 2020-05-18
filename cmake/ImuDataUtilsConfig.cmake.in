@@ -1,0 +1,25 @@
+# - Config file for the imuDataUtils package
+# It defines the following variables
+#  IMUDATAUTILS_INCLUDE_DIR - include directories for imuDataUtils
+#  IMUDATAUTILS_LIBRARIES    - libraries to link against
+#  IMUDATAUTILS_EXECUTABLE   - any executables (not used right now, set as empty.)
+
+# Compute paths
+get_filename_component(IMUDATAUTILS_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+if(EXISTS "${IMUDATAUTILS_CMAKE_DIR}/CMakeCache.txt")
+  # In build tree
+  set(IMUDATAUTILS_INCLUDE_DIR @CMAKE_SOURCE_DIR@ CACHE PATH "imuDataUtils include directory")
+else()
+  # Find installed library
+  set(IMUDATAUTILS_INCLUDE_DIR "${IMUDATAUTILS_CMAKE_DIR}/@CONF_REL_INCLUDE_DIR@" CACHE PATH "imuDataUtils include directory")
+  set(IMUDATAUTILS_LIBRARIES ${IMUDATAUTILS_CMAKE_DIR}/@CONF_REL_LIB_DIR@/libimuDataUtils.so CACHE FILEPATH "imuDataUtils shared library")
+endif()
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET imuDataUtils AND NOT IMUDATAUTILS_BINARY_DIR)
+  include("${IMUDATAUTILS_CMAKE_DIR}/ImuDataUtilsTargets.cmake")
+endif()
+
+
+message(STATUS "imuDataUtils include directory: " ${IMUDATAUTILS_INCLUDE_DIR})
+message(STATUS "imuDataUtils shared library: ${IMUDATAUTILS_LIBRARIES}")
