@@ -20,15 +20,10 @@ namespace datapkgr{
     bool is_apdm_h5_version5(std::string filestr);
     std::vector<std::vector<double>> get_2d_data_from_dataset(const h5::DataSet& ds);
     int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>);
+    std::vector<double> get_1d_double_from_dataset(const h5::DataSet& ds);
+    std::vector<int> get_1d_int_from_dataset(const h5::DataSet& ds);
     std::vector<std::vector<double>> makeNestedVector(const std::vector<double>& data1, const std::vector<double>& data2, const std::vector<double>& data3);
     int apdmCaseIdStringToInt(const std::string &caseId);
-    template<typename T>
-    std::vector<T> get_1d_data_from_dataset(const h5::DataSet& ds){
-        // simple function to return 1d dataset as vector of type T
-        std::vector<T> datavec1;
-        ds.read(datavec1);
-        return datavec1;
-    }
     template<typename T>
     static int getNearestIdxFromVector(const std::vector<T>& myvec, const T& queryPt){
         std::vector<T> newvec(myvec.size());

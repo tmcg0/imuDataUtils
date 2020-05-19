@@ -4,6 +4,8 @@
 # * CMAKE_INSTALL_INCLUDEDIR
 include(GNUInstallDirs)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 message(STATUS "+++++++++++++++++++   Beginning CMake IMU utilities   ++++++++++++++++++++")
 cmake_minimum_required(VERSION 3.5)
 project(imuDataUtils VERSION 0.0 LANGUAGES CXX)

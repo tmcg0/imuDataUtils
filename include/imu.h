@@ -11,7 +11,7 @@ public:
     imu(std::string filePath, std::string labelName); // construct a single imu from a label name in .h5 file
     std::vector<double> gx, gy, gz, ax, ay, az, mx, my, mz, qs, qx, qy, qz; // IMU sensor data arrays
     std::vector<double> relTimeSec; // time of measurements, relative to zero in seconds
-    std::vector<uint> unixTimeUtc; // unix time stamp in seconds, utc
+    std::vector<double> unixTimeUtc; // unix time stamp in seconds, utc
     int id; // unique id integer. in apdm sensors that looks like XI-000###
     std::vector<std::vector<double>> quaternion() const; // retrieve quaternion as vector<vector<double>>
     std::string label; // a label to uniquely id an imu in a set
@@ -40,7 +40,7 @@ struct imudata{
     // this is a simple struct to hold pure imu data for a *single* imu!
     std::vector<double> ax, ay, az, gx, gy, gz, mx, my, mz, relTimeSec, pressure, temperature;
     std::vector<double> qs, qx, qy, qz;
-    std::vector<uint> unixTimeUtcMicrosec;
+    std::vector<double> unixTimeUtcMicrosec; // coerce these into a double if necessary (often read from a unit timestamp)
     std::string label;
     int id;
 };

@@ -47,17 +47,16 @@ namespace datapkgr{
                 std::vector<std::vector<double>> dataAccel=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Accelerometer"));
                 std::vector<std::vector<double>> dataGyro=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Gyroscope"));
                 std::vector<std::vector<double>> dataMag=get_2d_data_from_dataset(currentSensorGroup.getDataSet("Magnetometer"));
-                std::vector<uint> unixTimeUtcMicroseconds=get_1d_data_from_dataset<uint>(currentSensorGroup.getDataSet("Time"));
+                std::vector<double> unixTimeUtcMicroseconds=get_1d_double_from_dataset(currentSensorGroup.getDataSet("Time"));
                 // now loop through and set data
-                int vecLen=dataAccel.size();
-                std::vector<double> ax(vecLen), ay(vecLen), az(vecLen), gx(vecLen), gy(vecLen), gz(vecLen), mx(vecLen), my(vecLen), mz(vecLen);
-                std::vector<double> t(vecLen);
+                uint vecLen=dataAccel.size();
+                std::vector<double> t(vecLen), ax(vecLen), ay(vecLen), az(vecLen), gx(vecLen), gy(vecLen), gz(vecLen), mx(vecLen), my(vecLen), mz(vecLen);
                 // todo: pull out quat into 2d data and set it to vectors for qs, qx, qy, qz
-                for (int j=0;j<vecLen;j++) {
+                for (uint j=0;j<vecLen;j++) {
                     ax[j] = dataAccel[j][0]; ay[j] = dataAccel[j][1]; az[j] = dataAccel[j][2];
                     gx[j] = dataGyro[j][0]; gy[j] = dataGyro[j][1]; gz[j] = dataGyro[j][2];
                     mx[j] = dataMag[j][0]; my[j] = dataMag[j][1]; mz[j] = dataMag[j][2];
-                    t[j] = (unixTimeUtcMicroseconds[j] - unixTimeUtcMicroseconds[0]) / 1e6; // convert from unix time to relative time vector in seconds
+                    t[j] = (unixTimeUtcMicroseconds[j] - unixTimeUtcMicroseconds[0]) / 1.0e6; // convert from unix time to relative time vector in seconds
                 }// for loop to store data
                 // now also pull out quaternion, if exists
                 std::vector<std::vector<double>> q;
@@ -264,6 +263,19 @@ namespace datapkgr{
         return datavec2;
     }
 
+    std::vector<double> get_1d_double_from_dataset(const h5::DataSet& ds){
+        // simple function to return 1d dataset as vector of type T
+        std::vector<double> datavec1;
+        ds.read(datavec1);
+        return datavec1;
+    }
+
+    std::vector<int> get_1d_int_from_dataset(const h5::DataSet& ds){
+        // simple function to return 1d dataset as vector of type T
+        std::vector<int> datavec1;
+        ds.read(datavec1);
+        return datavec1;
+    }
 
     int write_1d_data_to_dataset(const h5::DataSet& ds, std::vector<double>){
         throw std::runtime_error("unimplemented");
