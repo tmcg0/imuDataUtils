@@ -39,7 +39,8 @@ std::vector<T> slice(std::vector<T> const &v, int m, int n){
 struct imudata{
     // this is a simple struct to hold pure imu data for a *single* imu!
     std::vector<double> ax, ay, az, gx, gy, gz, mx, my, mz, relTimeSec, pressure, temperature;
-    std::vector<double> unixTimeUtcMicrosec, qs, qx, qy, qz;
+    std::vector<double> qs, qx, qy, qz;
+    std::vector<double> unixTimeUtcMicrosec; // coerce these into a double if necessary (often read from a unit timestamp)
     std::string label;
     int id;
 };
