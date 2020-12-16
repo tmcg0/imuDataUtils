@@ -1,9 +1,9 @@
 # imuDataUtils
 
-##### A general C++ class and functions for constructing and holding IMU data
+##### A general C++ library for constructing and holding IMU data
 Class ```imu``` represents a generic class to hold IMU data. It may be constructed directly or a map may be created to map the IMU to its label. ```datapkgr``` namepspace handles this. It also provides an extended contructor for ```imu``` to conveniently construct that map from an IMU file.
 
-**Important note**: imuDataUtils does not perform estimation of any sort on IMU data. Its purpose is to simply read, write, and hold IMU data across different sources. It is intended to be a useful subcomponent of larger estimation frameworks.
+**Note**: imuDataUtils does not perform estimation of any sort on IMU data. Its purpose is to simply read, write, and hold IMU data across different sources. It is intended to be a useful subcomponent of larger estimation frameworks.
 
 ## Executables
 ##### In the /exe/ folder you'll find the source code for 3 executables which are built by CMake:
@@ -21,13 +21,20 @@ usage: ```./imuh5tocsv path/to/h5/file.h5 file/to/save/to.csv```
 
 ## Dependencies
 - Boost::Filesystem
+- installed [HighFive library](https://github.com/BlueBrain/HighFive)
+- hdf5 libraries (Ubuntu: `sudo apt-get install libhdf5-serial-dev`)
 
 ## Installation
-None. Just download source, check dependenices, and build using CMake.
+Built using CMake
+From root of repo:
+```
+- mkdir build
+- cd build
+- cmake ..
+- make install # (may require root privileges)
+- make test # (optional, runs unit tests)
+```
 
 ## Supported IMU file types
 See [supported IMU file formats](https://github.com/tmcg0/imuDataUtils/wiki/Supported-IMU-file-formats) for more info.
 - APDM .h5 files (version 5)
-
-## Acknowledgements
-- Thanks to the folks at [BlueBrain](https://www.epfl.ch/research/domains/bluebrain/). Their [HighFive](https://github.com/BlueBrain/HighFive) H5 C++ library is packed inside imuDataUtils.

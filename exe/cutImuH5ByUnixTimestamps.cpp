@@ -28,8 +28,8 @@ int main(int argc, char** argv){
         return 3;
     }
     // construct integers for third and fourth arguments
-    long int startTime=strtol(argv[3],nullptr,0);
-    long int stopTime=strtol(argv[4],nullptr,0);
+    double startTime=(double)strtol(argv[3],nullptr,0);
+    double stopTime=(double)strtol(argv[4],nullptr,0);
     // construct imu map from input file
     std::map<std::string,imu> ImuMap=imu::getImuMapFromDataFile(inputFile);
     // check that both unix times are within (inclusive) the times of the IMU
@@ -48,8 +48,8 @@ int main(int argc, char** argv){
         return 6;
     }
     // todo: get closest associated indexes and cut by index
-    int startTimeIdx=datapkgr::getNearestIdxFromVector<double>(ImuMap.begin()->second.unixTimeUtc,(double) startTime);
-    int stopTimeIdx=datapkgr::getNearestIdxFromVector<double>(ImuMap.begin()->second.unixTimeUtc,(double) stopTime);
+    uint startTimeIdx=datapkgr::getNearestIdxFromVector<double>(ImuMap.begin()->second.unixTimeUtc, startTime);
+    uint stopTimeIdx=datapkgr::getNearestIdxFromVector<double>(ImuMap.begin()->second.unixTimeUtc, stopTime);
     // now cut imu map
     std::map<std::string,imu> ImuMapCut=datapkgr::cutImuMapByIdx(ImuMap,startTimeIdx,stopTimeIdx);
     // write imu map to output h5 file
