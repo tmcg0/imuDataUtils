@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 message(STATUS "+++++++++++++++++++   Beginning CMake IMU utilities   ++++++++++++++++++++")
 cmake_minimum_required(VERSION 3.5)
-project(imuDataUtils VERSION 0.0 LANGUAGES CXX)
+project(imuDataUtils VERSION 0.0 LANGUAGES CXX C)
 set(PROJECT_DESCRIPTION "File I/O for various IMUs") # for compatibility with CMake 3.8.2
 set(CMAKE_CXX_STANDARD 14)
 
