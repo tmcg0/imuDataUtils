@@ -1,4 +1,6 @@
-# imuDataUtils
+## ⚠️ this library is no longer actively maintained, but left for posterirty of users who need convenience wrappers to the [APDM Opal](https://apdm.com/wearable-sensors/) v1 and v2 hardware model's [HDF5 file specification](https://share.apdm.com/documentation/DevelopersGuide.pdf)
+
+## imuDataUtils
 
 ##### A general C++ library for constructing and holding IMU data
 Class ```imu``` represents a generic class to hold IMU data. It may be constructed directly or a map may be created to map the IMU to its label. ```datapkgr``` namepspace handles this. It also provides an extended contructor for ```imu``` to conveniently construct that map from an IMU file.
